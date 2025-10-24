@@ -9,12 +9,13 @@ def save_annotation_to_tsv(annotations, output_file):
             f.write(f"{ann['token']}\t{ann['stem']}\t{ann['lemma']}\n")
 
 def create_annotated_corpus(dataset_path, output_dir='assets/annotated-corpus'):
+    dataset_name = dataset_path.split('/')[-1].replace('.csv', '')
     dataset_data = read_csv_file(dataset_path)
     
     if dataset_data is None:
         return
     
-    output_path = Path(output_dir)
+    output_path = Path(output_dir + f'/{dataset_name}')
     output_path.mkdir(parents=True, exist_ok=True)
     
     columns, label_col, text_col = get_columns(dataset_data)

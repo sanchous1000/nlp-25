@@ -1,6 +1,7 @@
 import sys
 from text_utils import process_text
 from annotation import create_annotated_corpus
+from time import time
 
 def test_processing():
     test_texts = [
@@ -33,7 +34,9 @@ if __name__ == "__main__":
         output_dir = sys.argv[2] if len(sys.argv) > 2 else 'assets/annotated-corpus'
         
         test_processing()
+        start = time()
         create_annotated_corpus(dataset_path, output_dir)
+        print(time() - start)
     else:
         print("Использование: python main.py <путь_к_датасету> [путь_к_выходной_папке]")
         print("Пример: python main.py dataset/train.csv")

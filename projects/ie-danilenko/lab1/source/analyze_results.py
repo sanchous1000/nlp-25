@@ -97,7 +97,7 @@ def print_statistics(lemmatization_stats, homonymy_cases):
         print(f"  {lemma}: {count}")
 
 if __name__ == "__main__":
-    corpus_dir = sys.argv[1] if len(sys.argv) > 1 else 'assets/annotated-corpus'
+    corpus_dir = sys.argv[1] if len(sys.argv) > 1 else 'assets/annotated-corpus/test'
     print("Анализ результатов лемматизации")
     print("="*60)
     
