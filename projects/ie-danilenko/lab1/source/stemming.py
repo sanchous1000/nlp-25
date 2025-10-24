@@ -2,11 +2,9 @@ from nltk.stem import SnowballStemmer
 import warnings
 warnings.filterwarnings('ignore')
 
-# Используем только английский стеммер
 stemmer = SnowballStemmer('english')
 
 def stem_word(word):
-    """Стемминг слова (только английский)"""
     try:
         return stemmer.stem(word.lower())
     except:
