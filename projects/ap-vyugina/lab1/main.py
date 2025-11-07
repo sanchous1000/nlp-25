@@ -1,7 +1,7 @@
 from time import time
 
 import pandas as pd
-from src.text_processing import TextProcessor
+from source.text_processing import TextProcessor
 from tqdm import tqdm
 
 
@@ -9,11 +9,11 @@ processor = TextProcessor()
 
 for set_ in ["train", "test"]:
 
-    df = pd.read_csv(f'assets/raw/{set_}.csv', 
+    df = pd.read_csv(f'../assets/raw/{set_}.csv', 
                     header=None, names=['category', 'title', 'text'])
 
     files = {
-        c: open(f'assets/annotated-corpus/{set_}/{c}.tsv', mode='a', encoding='utf-8')
+        c: open(f'../assets/annotated-corpus/{set_}/{c}.tsv', mode='a', encoding='utf-8')
         for c in sorted(df["category"].unique())
     }
 
