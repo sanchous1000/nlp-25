@@ -1,2 +1,6 @@
 __pycache__/
-assets/
+
+*.pkl
+*.tsv
+*.csv
+*.model
