@@ -2,7 +2,7 @@ import re
 
 from nltk import pos_tag
 from nltk.corpus import wordnet
-from nltk.stem import SnowballStemmer, WordNetLemmatizer
+from nltk.stem import StemmerI, WordNetLemmatizer
 
 # Предопределённые паттерны для сложных токенов
 COMPLEX_TOKEN_PATTERNS = [
@@ -45,7 +45,7 @@ def tokenize(text: str) -> list[list[str]]:
 
 def process_tokens(
     sentences: list[list[str]], # Список предложений, где каждое предложение - список слов
-    stemmer: SnowballStemmer, # Алгоритм стемминга (например, Porter или Snowball)
+    stemmer: StemmerI, # Алгоритм стемминга (например, Porter или Snowball)
     lemmatizer: WordNetLemmatizer, # Лемматизатор из WordNet
 ) -> list[list[tuple[str, str, str]]]:
     """
