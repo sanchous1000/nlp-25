@@ -9,8 +9,8 @@ from tqdm import tqdm
 from text import tokenize, process_tokens
 
 dataset_name = "test"  # train or test
-dataset_dir = Path("../../dataset")
-out_path = Path(f"../../assets/annotated-corpus/{dataset_name}")
+dataset_dir = Path("../dataset")
+out_path = Path(f"../assets/annotated-corpus/{dataset_name}")
 
 def setup_nltk():
     try:
