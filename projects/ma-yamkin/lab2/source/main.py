@@ -115,7 +115,7 @@ def vectorize_dataframe(df, model: Word2Vec):
             'embedding': emb
         })
 
-    save_annotated_corpus(doc_vectors, 'test')
+    save_annotated_corpus(doc_vectors, 'train')
 
 
 def sanitize_label(label):
@@ -139,10 +139,10 @@ def save_annotated_corpus(documents, mode):
             f.write(f"{doc_id}\t{embedding_str}\n")
 
 
-if __name__ == '__main':
+if __name__ == '__main__':
     MODEL = Word2Vec.load('word2vec_model.model')
 
     column_names = ['class', 'title', 'text']
-    DATA = pd.read_csv("../../test.csv", header=None, names=column_names)
+    DATA = pd.read_csv("../../train.csv", header=None, names=column_names)
 
     vectorize_dataframe(df=DATA, model=MODEL)
