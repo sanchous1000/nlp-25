@@ -1,5 +1,7 @@
 import numpy as np
 
+unknown_vector = np.random.rand(30)
+
 def read_and_group(filename):
     with open(filename, 'r', encoding='utf-8') as file:
         sentence = []  # Временный контейнер для хранения текущего блока слов
@@ -21,7 +23,11 @@ def weighted_average_vector(tokens, model, term_weights):
     total_weight = 0
     
     for token in tokens:
-        vectors.append(model.wv[token].reshape(-1, 1) * term_weights.get(token.lower(), 0))
+        try:
+            token_embedding = model.wv[token]
+        except KeyError:
+            token_embedding = unknown_vector
+        vectors.append(token_embedding.reshape(-1, 1) * term_weights.get(token.lower(), 0))
         total_weight += term_weights.get(token.lower(), 0)
     
     if total_weight != 0:
