@@ -46,7 +46,7 @@ def read_annotated_corpus():
     return sentences
 
 
-def train_word2vec(sentences, vector_size=100, window=5, min_count=1, workers=4, epochs=10):
+def train_word2vec(sentences, vector_size=100, window=5, min_count=1, epochs=10):
     """Обучение модели Word2Vec"""
 
     model = Word2Vec(
@@ -54,12 +54,8 @@ def train_word2vec(sentences, vector_size=100, window=5, min_count=1, workers=4,
         vector_size=vector_size,
         window=window,
         min_count=min_count,
-        workers=workers,
         epochs=epochs,
-        sg=1,
-        negative=5,
         seed=42,
-        hs=0
     )
 
     return model
@@ -73,7 +69,6 @@ def main():
         vector_size=100,
         window=5,
         min_count=1,
-        workers=4,
         epochs=10
     )
 
