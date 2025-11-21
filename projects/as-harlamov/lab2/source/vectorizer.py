@@ -37,7 +37,6 @@ def document_to_vector(text: str, w2v_model: Word2Vec, vector_size: int) -> np.n
             sent_vec = np.mean(word_vectors, axis=0)
             sent_vectors.append(sent_vec)
 
-    # 4. Вектор документа
     if sent_vectors:
         doc_vec = np.mean(sent_vectors, axis=0)
     else:
