@@ -33,9 +33,9 @@ def demo_semantic_similarity(model: Word2Vec, test_word: str = "doctor"):
 
 def run_hyperparam_experiments(sentences: List[List[str]]):
     configs = [
-        {"name": "small_skip", "vector_size": 50, "window": 3, "sg": 1},
-        {"name": "default_skip", "vector_size": 100, "window": 5, "sg": 1},
-        {"name": "large_skip", "vector_size": 200, "window": 7, "sg": 1},
+        {"name": "small_", "vector_size": 50, "window": 3, "sg": 1},
+        {"name": "default", "vector_size": 100, "window": 5, "sg": 1},
+        {"name": "large", "vector_size": 200, "window": 7, "sg": 1},
         {"name": "cbow", "vector_size": 100, "window": 5, "sg": 0},
     ]
 
