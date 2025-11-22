@@ -22,6 +22,9 @@ if __name__ == "__main__":
 
     tfidf_matrix = vectorizer.fit_transform(texts)
     feature_names = vectorizer.get_feature_names_out()
+    
+    with open('assets/tf-idf.pkl', 'wb') as file:
+        pickle.dump((tfidf_matrix, feature_names), file)
 
     tfidf_matrix = tfidf_matrix.max(axis=0).todense().reshape(-1, 1)
 
