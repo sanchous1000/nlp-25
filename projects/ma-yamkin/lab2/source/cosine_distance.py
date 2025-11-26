@@ -44,7 +44,7 @@ def demonstrate_cosine_distances(model, examples):
 
 
 def main():
-    model = Word2Vec.load('word2vec_model.model')
+    model = Word2Vec.load('source/word2vec_model.model')
 
     examples = [
         (

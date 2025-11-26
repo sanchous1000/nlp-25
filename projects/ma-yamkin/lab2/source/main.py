@@ -1,8 +1,10 @@
 import re
+import time
 import pandas as pd
 import numpy as np
 from gensim.models import Word2Vec
 from pathlib import Path
+import argparse
 
 
 def advanced_tokenize(text):
@@ -100,7 +102,7 @@ def vectorize_text(text, model):
     return doc_vector
 
 
-def vectorize_dataframe(df, model: Word2Vec):
+def vectorize_dataframe(df, model: Word2Vec, mode):
     # Векторизация каждого документа
     doc_vectors = []
 
@@ -115,7 +117,7 @@ def vectorize_dataframe(df, model: Word2Vec):
             'embedding': emb
         })
 
-    save_annotated_corpus(doc_vectors, 'train')
+    save_annotated_corpus(doc_vectors, mode)
 
 
 def sanitize_label(label):
@@ -126,7 +128,7 @@ def sanitize_label(label):
 
 
 def save_annotated_corpus(documents, mode):
-    base_dir = Path(f"../../assets/annotated-corpus")
+    base_dir = Path(f"../assets/annotated-corpus")
 
     output_path = base_dir / f"{mode}.tsv"
 
@@ -140,9 +142,18 @@ def save_annotated_corpus(documents, mode):
 
 
 if __name__ == '__main__':
-    MODEL = Word2Vec.load('word2vec_model.model')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, required=True)
+
+    args = parser.parse_args()
+
+    MODEL = Word2Vec.load('source/word2vec_model.model')
 
     column_names = ['class', 'title', 'text']
-    DATA = pd.read_csv("../../train.csv", header=None, names=column_names)
+    DATA = pd.read_csv(f"../{args.dataset}.csv", header=None, names=column_names)
 
-    vectorize_dataframe(df=DATA, model=MODEL)
+    start_time = time.time()
+    vectorize_dataframe(df=DATA, model=MODEL, mode=args.dataset)
+    end_time = time.time()
+
+    print(end_time - start_time)

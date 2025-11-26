@@ -1,10 +1,11 @@
 import os
+import time
 from tqdm import tqdm
 from gensim.models import Word2Vec
 
 
 def read_annotated_corpus():
-    train_dir = os.path.join('..', '..', 'assets', 'annotated-corpus', 'train')
+    train_dir = os.path.join('..', 'assets', 'annotated-corpus', 'train')
 
     subdirs = ['1', '2', '3', '4']
     sentences = []
@@ -64,6 +65,7 @@ def train_word2vec(sentences, vector_size=100, window=5, min_count=1, epochs=10)
 def main():
     sentences = read_annotated_corpus()
 
+    start_time = time.time()
     model = train_word2vec(
         sentences,
         vector_size=100,
@@ -71,8 +73,11 @@ def main():
         min_count=1,
         epochs=10
     )
+    end_time = time.time()
 
-    model.save('word2vec_model.model')
+    print(end_time - start_time)
+
+    model.save('source/word2vec_model.model')
 
 
 if __name__ == "__main__":
