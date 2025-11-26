@@ -19,7 +19,7 @@ def visualize_term_document_matrix(td_matrix, term_to_index, output_path, max_te
     plt.figure(figsize=figsize)
     sns.set_theme(style="whitegrid")
     
-    ax = sns.heatmap(
+    sns.heatmap(
         submatrix,
         annot=False,
         cmap="Blues",
@@ -29,9 +29,9 @@ def visualize_term_document_matrix(td_matrix, term_to_index, output_path, max_te
         yticklabels=terms
     )
     
-    plt.xlabel("Document")
-    plt.ylabel("Term")
-    plt.title(f"Term-Document Matrix (Top {terms_subset} terms × {docs_subset} docs)")
+    plt.xlabel("Документ")
+    plt.ylabel("Термин")
+    plt.title(f"Матрица термин документ (Топ {terms_subset} терминов × {docs_subset} документов)")
     plt.xticks(rotation=90, ha='center')
     plt.yticks(rotation=0)
     plt.tight_layout()
