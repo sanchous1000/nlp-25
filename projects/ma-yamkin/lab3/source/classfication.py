@@ -21,11 +21,11 @@ def load_labels(file_path):
 
 
 def load_data():
-    train_doc_ids, X_train = load_embeddings('../../assets/annotated-corpus/train.tsv')
-    test_doc_ids, X_test = load_embeddings('../../assets/annotated-corpus/test.tsv')
+    train_doc_ids, X_train = load_embeddings('../assets/annotated-corpus/train.tsv')
+    test_doc_ids, X_test = load_embeddings('../assets/annotated-corpus/test.tsv')
 
-    train_labels_dict = load_labels('../../train.csv')
-    test_labels_dict = load_labels('../../test.csv')
+    train_labels_dict = load_labels('../train.csv')
+    test_labels_dict = load_labels('../test.csv')
 
     y_train = np.array([train_labels_dict[doc_id] for doc_id in train_doc_ids])
     y_test = np.array([test_labels_dict[doc_id] for doc_id in test_doc_ids])
@@ -177,7 +177,13 @@ def run_svm_hyperparameter_search(
 
         best = max(kernel_results, key=lambda x: x['f1_score'])
         best_iters_per_kernel[kernel] = best['max_iter']
-        print(f"Лучшее max_iter для {kernel}: {best['max_iter']} (F1={best['f1_score']:.4f})")
+        print(f"Лучшее max_iter для {kernel}: {best['max_iter']} "
+              f"(F1_macro={best['f1_score']:.4f})"
+              f"(F1_micro={best['micro_f1']:.4f})"
+              f"(recall={best['recall']:.4f})"
+              f"(precision={best['precision']:.4f})"
+              f"(accuracy={best['accuracy']:.4f})"
+              f"training_time={best['training_time']}")
 
     return best_iters_per_kernel
 

@@ -11,7 +11,7 @@ from sklearn.metrics import r2_score
 
 
 def load_data():
-    path = '../../assets/annotated-corpus/term_doc_matrix'
+    path = '../assets/annotated-corpus/term_doc_matrix'
 
     loader = np.load(path+'_train/term_document_matrix.npz')
     td_matrix_train = csr_matrix(
@@ -28,7 +28,7 @@ def load_data():
         td_matrix_train = td_matrix_train.T
 
     column_names = ['class', 'title', 'text']
-    df = pd.read_csv('../../train.csv', header=None, names=column_names)
+    df = pd.read_csv('../train.csv', header=None, names=column_names)
 
     return td_matrix_train, index_to_term_train, len(df)
 
@@ -42,7 +42,7 @@ def get_top_words_per_topic(lda_model, feature_names, n_top_words=10):
     return topics_words
 
 
-def save_document_topic_probs(doc_topic_probs, doc_ids, n_topics, out_dir='../lda_results'):
+def save_document_topic_probs(doc_topic_probs, doc_ids, n_topics, out_dir='lda_results'):
     os.makedirs(out_dir, exist_ok=True)
     filename = os.path.join(out_dir, f'doc_topic_probs_K{n_topics}.tsv')
     with open(filename, 'w', encoding='utf-8') as f:
@@ -70,8 +70,8 @@ def save_top_docs_per_topic(doc_topic_dists, n_top_docs=1):
         ]
 
     # Сохранение в файл
-    os.makedirs('../lda_results', exist_ok=True)
-    with open(f'../lda_results/top_docs_K{n_topics}.tsv', 'w', encoding='utf-8') as f:
+    os.makedirs('lda_results', exist_ok=True)
+    with open(f'lda_results/top_docs_K{n_topics}.tsv', 'w', encoding='utf-8') as f:
         f.write("topic_id\tdoc_id\tprobability\n")
         for topic_id, docs in top_docs.items():
             for doc_id, prob in docs:
@@ -92,8 +92,8 @@ def run_experiment(td_matrix, index_to_term, n_topics_list, len_train):
             max_iter=100
         )
 
-        td_matrix_train = td_matrix[:120000]
-        td_matrix_test = td_matrix[120000:]
+        td_matrix_train = td_matrix[:2]
+        td_matrix_test = td_matrix[2:4]
 
         # Замер времени обучения
         start_time = time.time()
@@ -107,7 +107,7 @@ def run_experiment(td_matrix, index_to_term, n_topics_list, len_train):
             print(f"Тема {i}: {', '.join(words)}")
 
         # Сохранение топ-10 слов в JSON
-        out_dir = '../lda_results'
+        out_dir = 'lda_results'
         os.makedirs(out_dir, exist_ok=True)
         json_filename = os.path.join(out_dir, f'top_words_K{n_topics}.json')
         with open(json_filename, 'w', encoding='utf-8') as f:
@@ -156,7 +156,7 @@ def build_graph(results):
     plt.title('Зависимость Perplexity от количества тем в LDA')
     plt.grid(True)
     plt.legend()
-    plt.savefig('../lda_results/perplexity_vs_topics.png', dpi=150)
+    plt.savefig('lda_results/perplexity_vs_topics.png', dpi=150)
     plt.show()
 
     # График времени обучения
@@ -168,7 +168,7 @@ def build_graph(results):
     plt.title('Зависимость времени обучения LDA от количества тем')
     plt.grid(True)
     plt.legend()
-    plt.savefig('../lda_results/train_time_vs_topics.png', dpi=150)
+    plt.savefig('lda_results/train_time_vs_topics.png', dpi=150)
     plt.show()
 
     # Полиномиальная аппроксимация для perplexity (остаётся без изменений)
@@ -199,7 +199,7 @@ def build_graph(results):
     plt.title('Полиномиальная аппроксимация зависимости Perplexity от K')
     plt.grid(True)
     plt.legend()
-    plt.savefig('../lda_results/perplexity_approximation.png', dpi=150)
+    plt.savefig('lda_results/perplexity_approximation.png', dpi=150)
     plt.show()
 
 

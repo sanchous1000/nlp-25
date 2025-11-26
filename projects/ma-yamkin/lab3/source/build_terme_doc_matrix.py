@@ -12,8 +12,8 @@ english_stopwords = set(stopwords.words('english'))
 
 
 def read_annotated_corpus():
-    train_dir = os.path.join('..', '..', 'assets', 'annotated-corpus', 'train')
-    test_dir = os.path.join('..', '..', 'assets', 'annotated-corpus', 'test')
+    train_dir = os.path.join('..', 'assets', 'annotated-corpus', 'train')
+    test_dir = os.path.join('..', 'assets', 'annotated-corpus', 'test')
 
     docs_train = read_mode(train_dir)
     docs_test = read_mode(test_dir)
