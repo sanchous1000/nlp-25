@@ -79,8 +79,8 @@
 
 ## Инструкция по запуску
 1. Установить зависимости: `pip install -r requirements.txt`
-2. Запустить прошлую лабораторную работу и сохранить аннотированные корпуса в директорию ../../assets/annotated-corpus/train относительно текущей.
-3. Загрузить датасет: [train.csv](https://raw.githubusercontent.com/mhjabreel/CharCnn_Keras/master/data/ag_news_csv/train.csv) в папку ../../train.csv относительно текущей.
+2. Запустить прошлую лабораторную работу и сохранить аннотированные корпуса в директорию ../assets/annotated-corpus/train относительно текущей.
+3. Загрузить датасет: [train.csv](https://raw.githubusercontent.com/mhjabreel/CharCnn_Keras/master/data/ag_news_csv/train.csv) в папку ../train.csv относительно текущей.
 4. Запустить скрипт: `python source/train_w2v.py` для обучения word2vec.
 5. Запустить скрипт: `python source/cosine_distance.py` для подсчета косинусного расстояния между разными токенами.
 6. Запустить скринт: `python source/main.py --dataset 'train'` для векторизации тренировочного датасета и `python source/main.py --dataset 'test'` для векторизации тестового датасета.
