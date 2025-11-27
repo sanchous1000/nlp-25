@@ -2,3 +2,5 @@ numpy
 gensim
 scikit-learn
 tqdm
+matplotlib
+seaborn
