@@ -1,7 +1,12 @@
 import argparse
 from pathlib import Path
 
-from utils import download_nltk_data, process_dataset, demonstrate_lemmatization_ambiguity
+from utils import (
+    download_nltk_data,
+    process_dataset,
+    process_dataset_single,
+    demonstrate_lemmatization_ambiguity
+)
 
 
 def main():
@@ -16,6 +21,10 @@ def main():
                         help='Generate lemmatization evaluation report')
     parser.add_argument('--verbose', action='store_true', default=True,
                         help='Print progress information')
+    parser.add_argument('--workers', type=int, default=None,
+                        help='Number of worker processes (default: cpu_count - 1)')
+    parser.add_argument('--single', action='store_true',
+                        help='Use single-threaded mode (no multiprocessing)')
 
     args = parser.parse_args()
 
@@ -29,7 +38,12 @@ def main():
         print(f"Dataset directory: {dataset_dir}")
         print(f"Output directory: {output_dir}")
 
-        process_dataset(str(dataset_dir), str(output_dir), args.verbose)
+        if args.single:
+            print("Using single-threaded mode")
+            process_dataset_single(str(dataset_dir), str(output_dir), args.verbose)
+        else:
+            process_dataset(str(dataset_dir), str(output_dir), args.verbose, args.workers)
+
         print("\nCompleted successfully!")
 
 

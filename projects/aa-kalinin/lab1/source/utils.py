@@ -1,6 +1,9 @@
 import csv
+import os
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Tuple
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from multiprocessing import cpu_count
 
 import nltk
 from tqdm import tqdm
@@ -18,6 +21,49 @@ def download_nltk_data():
             nltk.download(package, quiet=True)
         except Exception as e:
             print(f"Warning: Could not download {package}: {e}")
+
+
+# Global processor for worker processes (initialized once per worker)
+_worker_processor = None
+
+
+def _init_worker():
+    """Initialize worker process with its own TextProcessor."""
+    global _worker_processor
+    _worker_processor = TextProcessor()
+
+
+def _process_document(args: Tuple[str, str, str, str, str]) -> str:
+    """
+    Worker function to process a single document.
+
+    Args:
+        args: Tuple of (doc_id, label, text, split, output_dir)
+
+    Returns:
+        doc_id on success
+    """
+    global _worker_processor
+    doc_id, label, text, split, output_dir = args
+
+    # Initialize processor if not already done
+    if _worker_processor is None:
+        _init_worker()
+
+    output_path = Path(output_dir) / split / label
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    sentences = _worker_processor.process_text(text)
+
+    tsv_path = output_path / f"{doc_id}.tsv"
+    with open(tsv_path, 'w', encoding='utf-8') as f:
+        for i, sentence in enumerate(sentences):
+            for token, stem, lemma in sentence:
+                f.write(f"{token}\t{stem}\t{lemma}\n")
+            if i < len(sentences) - 1:
+                f.write("\n")
+
+    return doc_id
 
 
 class AnnotationGenerator:
@@ -66,8 +112,56 @@ def load_dataset(csv_path: str) -> List[Dict]:
     return documents
 
 
-def process_dataset(dataset_dir: str, output_dir: str, verbose: bool = True):
-    """Process entire dataset and generate annotations."""
+def process_dataset(dataset_dir: str, output_dir: str, verbose: bool = True, n_workers: int = None):
+    """
+    Process entire dataset and generate annotations using multiprocessing.
+
+    Args:
+        dataset_dir: Path to dataset directory containing train.csv and test.csv
+        output_dir: Path to output directory for annotations
+        verbose: Print progress information
+        n_workers: Number of worker processes (default: cpu_count - 1)
+    """
+    dataset_path = Path(dataset_dir)
+
+    # Determine number of workers
+    if n_workers is None:
+        n_workers = max(1, cpu_count() - 1)
+
+    if verbose:
+        print(f"Using {n_workers} worker processes")
+
+    for split in ['train', 'test']:
+        csv_path = dataset_path / f"{split}.csv"
+        if not csv_path.exists():
+            if verbose:
+                print(f"Warning: {csv_path} not found, skipping...")
+            continue
+
+        documents = load_dataset(str(csv_path))
+
+        # Prepare arguments for workers
+        work_items = [
+            (doc['doc_id'], doc['label'], doc['text'], split, output_dir)
+            for doc in documents
+        ]
+
+        # Process with multiprocessing
+        with ProcessPoolExecutor(max_workers=n_workers, initializer=_init_worker) as executor:
+            futures = {executor.submit(_process_document, item): item[0] for item in work_items}
+
+            with tqdm(total=len(futures), desc=f"Processing {split}", disable=not verbose) as pbar:
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        doc_id = futures[future]
+                        print(f"Error processing {doc_id}: {e}")
+                    pbar.update(1)
+
+
+def process_dataset_single(dataset_dir: str, output_dir: str, verbose: bool = True):
+    """Process dataset in single-threaded mode (for debugging or small datasets)."""
     dataset_path = Path(dataset_dir)
     generator = AnnotationGenerator(output_dir)
 
