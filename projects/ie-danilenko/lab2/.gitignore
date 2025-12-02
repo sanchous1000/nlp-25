@@ -1,0 +1,8 @@
+**venv
+**dataset
+**__pycache__
+**assets/
+*.tsv
+*.csv
+*.DS_Store
+**output
