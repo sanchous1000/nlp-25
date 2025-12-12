@@ -16,14 +16,14 @@ max_iter = 5:
     40 тем:    187059.66
 
 max_iter = 10:
-  Оптимальное количество тем: 2 (perplexity=7882.86)
+  Оптимальное количество тем: 2 (perplexity=3256.48)
   Perplexity по количеству тем:
-     2 тем:      7882.86 <-- ОПТИМАЛЬНО
-     4 тем:      9982.67
-     5 тем:     11115.01
-    10 тем:     16184.32
-    20 тем:     29624.13
-    40 тем:     63626.89
+     2 тем:      3256.48 <-- ОПТИМАЛЬНО
+     4 тем:      4107.23
+     5 тем:      4058.68
+    10 тем:      4067.05
+    20 тем:      4182.26
+    40 тем:      4241.16
 
 max_iter = 20:
   Оптимальное количество тем: 2 (perplexity=8027.26)
@@ -36,71 +36,71 @@ max_iter = 20:
     40 тем:     45970.58
 
 ОБЩИЙ ОПТИМУМ:
-  max_iter=10, n_topics=2, perplexity=7882.86
+  max_iter=10, n_topics=2, perplexity=3256.48
 
 АНАЛИЗ ВЛИЯНИЯ КОЛИЧЕСТВА ИТЕРАЦИЙ:
 --------------------------------------------------------------------------------
 
 2 тем:
   max_iter= 5: perplexity=     8485.44
-  max_iter=10: perplexity=     7882.86
+  max_iter=10: perplexity=     3256.48
   max_iter=20: perplexity=     8027.26
 
 4 тем:
   max_iter= 5: perplexity=    11324.54
-  max_iter=10: perplexity=     9982.67
+  max_iter=10: perplexity=     4107.23
   max_iter=20: perplexity=    10018.15
 
 5 тем:
   max_iter= 5: perplexity=    12413.48
-  max_iter=10: perplexity=    11115.01
+  max_iter=10: perplexity=     4058.68
   max_iter=20: perplexity=    10771.98
 
 10 тем:
   max_iter= 5: perplexity=    23221.08
-  max_iter=10: perplexity=    16184.32
+  max_iter=10: perplexity=     4067.05
   max_iter=20: perplexity=    15587.42
 
 20 тем:
   max_iter= 5: perplexity=    55391.77
-  max_iter=10: perplexity=    29624.13
+  max_iter=10: perplexity=     4182.26
   max_iter=20: perplexity=    25929.62
 
 40 тем:
   max_iter= 5: perplexity=   187059.66
-  max_iter=10: perplexity=    63626.89
+  max_iter=10: perplexity=     4241.16
   max_iter=20: perplexity=    45970.58
 
 АНАЛИЗ ТОП-СЛОВ:
 --------------------------------------------------------------------------------
 Топ-15 самых частых слов во всех темах:
-   1. say             - 136 раз
+   1. say             - 123 раз
    2. 39              - 112 раз
-   3. new             -  98 раз
-   4. year            -  66 раз
-   5. reuters         -  59 раз
-   6. company         -  42 раз
-   7. ap              -  36 раз
-   8. win             -  35 раз
-   9. first           -  35 раз
-  10. game            -  32 раз
-  11. two             -  31 раз
-  12. inc             -  30 раз
-  13. president       -  27 раз
-  14. stock           -  24 раз
-  15. state           -  22 раз
+   3. new             -  71 раз
+   4. year            -  59 раз
+   5. reuters         -  56 раз
+   6. ap              -  36 раз
+   7. company         -  31 раз
+   8. first           -  29 раз
+   9. two             -  29 раз
+  10. president       -  28 раз
+  11. win             -  28 раз
+  12. state           -  24 раз
+  13. game            -  23 раз
+  14. kill            -  21 раз
+  15. people          -  21 раз
 
 Разнообразие слов (количество уникальных слов в топ-10):
-   2 тем:   22 уникальных слов
-   4 тем:   44 уникальных слов
-   5 тем:   57 уникальных слов
-  10 тем:  112 уникальных слов
-  20 тем:  213 уникальных слов
-  40 тем:  434 уникальных слов
+   2 тем:   28 уникальных слов
+   4 тем:   58 уникальных слов
+   5 тем:   65 уникальных слов
+  10 тем:  141 уникальных слов
+  20 тем:  276 уникальных слов
+  40 тем:  567 уникальных слов
 
 ПРИМЕРЫ ТЕМ ДЛЯ ОПТИМАЛЬНОЙ КОНФИГУРАЦИИ (max_iter=10, n_topics=2):
 --------------------------------------------------------------------------------
-Тема 1: say, reuters, new, year, report, thursday, wednesday, president, monday, stock
-Тема 2: new, year, game, first, win, company, ap, one, two, say
+Тема 1: say, kill, two, people, official, reuters, iraq, year, ap, military
+Тема 2: say, president, minister, election, leader, reuters, prime, government, palestinian, new
 
 ================================================================================

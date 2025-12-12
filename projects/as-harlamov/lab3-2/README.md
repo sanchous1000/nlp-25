@@ -42,6 +42,18 @@ cd source
 python main.py --test_dataset ../../lab2/assets/source-corpus/test.csv
 ```
 
+### Быстрый запуск с ограниченным корпусом
+
+```bash
+python main.py --test_dataset ../../lab2/assets/source-corpus/test.csv --max_docs 5000
+```
+
+### Запуск одного эксперимента
+
+```bash
+python main.py --test_dataset ../../lab2/assets/source-corpus/test.csv --n_topics 2 --max_iter 20
+```
+
 ### С экспериментами по количеству итераций
 
 ```bash
@@ -55,6 +67,8 @@ python main.py --test_dataset ../../lab2/assets/source-corpus/test.csv --experim
 - `--output`: директория для сохранения результатов (по умолчанию `../assets`)
 - `--n_classes`: количество классов в датасете (по умолчанию 4)
 - `--max_iter`: количество итераций обучения LDA (по умолчанию 10)
+- `--n_topics`: количество тем для одного эксперимента (если указано, запускается только этот эксперимент)
+- `--max_docs`: максимальное количество документов для загрузки (для ускорения обучения)
 - `--experiment_iterations`: провести эксперименты с разным количеством итераций (max_iter/2, max_iter, max_iter*2)
 
 ## Результаты

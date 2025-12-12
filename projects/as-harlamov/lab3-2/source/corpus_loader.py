@@ -19,10 +19,16 @@ except:
 
 HTML_ARTIFACTS = {'quot', 'lt', 'gt', 'amp', 'nbsp', 'mdash', 'ndash', 'hellip', 'rsquo', 'lsquo', 'rdquo', 'ldquo'}
 
+DAYS_OF_WEEK = {
+    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'mon', 'tue', 'wed', 'thu', 'fri',
+    'sat', 'sun',
+}
+
 STOP_WORDS.update(HTML_ARTIFACTS)
+STOP_WORDS.update(DAYS_OF_WEEK)
 
 
-def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
+def load_corpus_from_annotated_dir(annotated_dir: Path, max_docs: int = None) -> List[List[str]]:
     documents = []
     total_files = 0
     empty_files = 0
@@ -68,6 +74,10 @@ def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
 
         if total_files <= 5 and documents:
             print(f"    Файл {tsv_file.name}: {len(document)} токенов")
+
+        if max_docs and len(documents) >= max_docs:
+            print(f"  Достигнут лимит документов ({max_docs}), остановка загрузки")
+            break
 
     print(f"  Обработано файлов: {total_files}")
     print(f"  Всего строк: {total_lines}, строк с леммами: {lines_with_lemma}")

@@ -39,6 +39,10 @@ def run_lda_experiment(
         random_state=random_state,
         n_jobs=-1,
         verbose=0,
+        learning_method='online',
+        learning_decay=0.7,
+        doc_topic_prior=0.1,
+        topic_word_prior=0.01,
     )
 
     lda.fit(train_matrix)
@@ -103,7 +107,7 @@ def polynomial_func(x, *params):
 
 
 def find_best_polynomial_degree(x: np.ndarray, y: np.ndarray, max_degree: int = 5, min_r2_improvement: float = 0.01) -> \
-Tuple[int, np.ndarray, float]:
+    Tuple[int, np.ndarray, float]:
     results = []
 
     for degree in range(1, max_degree + 1):
@@ -197,6 +201,14 @@ def main():
         '--experiment_iterations', action='store_true',
         help='Провести эксперименты с разным количеством итераций',
     )
+    parser.add_argument(
+        '--n_topics', type=int, default=None,
+        help='Количество тем для одного эксперимента (если указано, запускается только этот эксперимент)',
+    )
+    parser.add_argument(
+        '--max_docs', type=int, default=None,
+        help='Максимальное количество документов для загрузки (для ускорения обучения)',
+    )
     args = parser.parse_args()
 
     script_dir = Path(__file__).parent.resolve()
@@ -210,7 +222,9 @@ def main():
     output_dir = (script_dir / args.output).resolve() if not Path(args.output).is_absolute() else Path(args.output)
 
     print("Загрузка обучающего корпуса...")
-    train_documents = load_corpus_from_annotated_dir(train_corpus_dir)
+    if args.max_docs:
+        print(f"  Ограничение размера корпуса: максимум {args.max_docs} документов")
+    train_documents = load_corpus_from_annotated_dir(train_corpus_dir, max_docs=args.max_docs)
     print(f"Загружено {len(train_documents)} документов")
 
     non_empty_train = [doc for doc in train_documents if doc]
@@ -221,8 +235,8 @@ def main():
     print("\nПостроение матрицы термин-документ для обучающей выборки...")
     train_matrix, feature_names, vectorizer = build_term_document_matrix(
         train_documents,
-        min_df=2,
-        max_df=0.95,
+        min_df=3,
+        max_df=0.85,
     )
     print(f"Размерность матрицы: {train_matrix.shape}")
     print(f"Количество признаков: {len(feature_names)}")
@@ -254,12 +268,18 @@ def main():
         print("Предупреждение: тестовая матрица не содержит терминов из словаря обучающей выборки")
         print("Это может привести к проблемам при вычислении perplexity")
 
-    n_topics_list = [2, 5, 10, 20, 40]
-    if args.n_classes not in n_topics_list:
-        n_topics_list.append(args.n_classes)
+    if args.n_topics:
+        n_topics_list = [args.n_topics]
+        print(f"\nРежим одного эксперимента: {args.n_topics} тем, {args.max_iter} итераций")
+    else:
+        n_topics_list = [2, 5, 10, 20, 40]
+        if args.n_classes not in n_topics_list:
+            n_topics_list.append(args.n_classes)
         n_topics_list.sort()
 
-    if args.experiment_iterations:
+    if args.n_topics:
+        iterations_list = [args.max_iter]
+    elif args.experiment_iterations:
         iterations_list = [args.max_iter // 2, args.max_iter, args.max_iter * 2]
     else:
         iterations_list = [args.max_iter]
@@ -305,8 +325,9 @@ def main():
 
         all_results[max_iter] = results
 
-        print(f"\nПостроение графика для max_iter={max_iter}...")
-        plot_perplexity(results, output_dir, max_iter)
+        if not args.n_topics:
+            print(f"\nПостроение графика для max_iter={max_iter}...")
+            plot_perplexity(results, output_dir, max_iter)
 
     print(f"\n{'=' * 60}")
     print("АНАЛИЗ РЕЗУЛЬТАТОВ")
