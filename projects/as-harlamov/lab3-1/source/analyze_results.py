@@ -1,6 +1,3 @@
-"""
-Скрипт для анализа результатов экспериментов классификации.
-"""
 import json
 from pathlib import Path
 from typing import Dict, List
@@ -10,7 +7,6 @@ import matplotlib
 import numpy as np
 import seaborn as sns
 
-# Настройка для корректного отображения русского текста
 matplotlib.rcParams['font.family'] = 'DejaVu Sans'
 try:
     plt.style.use('seaborn-v0_8-darkgrid')
@@ -21,22 +17,19 @@ except OSError:
         plt.style.use('default')
 sns.set_palette("husl")
 
-
 def load_results(results_path: Path) -> Dict:
-    """Загружает результаты из JSON файла."""
+    
     with open(results_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-
 def plot_svm_kernels_comparison(kernel_results: Dict, output_dir: Path) -> None:
-    """Строит графики сравнения kernel функций SVM."""
+    
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle('Comparison of SVM Kernel Functions', fontsize=16, fontweight='bold')
     
     kernels = list(kernel_results.keys())
     colors = plt.cm.tab10(np.linspace(0, 1, len(kernels)))
     
-    # График F1-score по итерациям
     ax1 = axes[0, 0]
     for kernel, color in zip(kernels, colors):
         results = kernel_results[kernel]
@@ -49,7 +42,6 @@ def plot_svm_kernels_comparison(kernel_results: Dict, output_dir: Path) -> None:
     ax1.legend()
     ax1.grid(True, alpha=0.3)
     
-    # График Accuracy по итерациям
     ax2 = axes[0, 1]
     for kernel, color in zip(kernels, colors):
         results = kernel_results[kernel]
@@ -62,7 +54,6 @@ def plot_svm_kernels_comparison(kernel_results: Dict, output_dir: Path) -> None:
     ax2.legend()
     ax2.grid(True, alpha=0.3)
     
-    # График времени обучения
     ax3 = axes[1, 0]
     kernel_names = []
     times = []
@@ -80,7 +71,6 @@ def plot_svm_kernels_comparison(kernel_results: Dict, output_dir: Path) -> None:
         ax3.text(bar.get_x() + bar.get_width()/2., height,
                 f'{height:.2f}s', ha='center', va='bottom')
     
-    # Сравнение лучших метрик
     ax4 = axes[1, 1]
     metrics = ['F1-score', 'Accuracy', 'Precision', 'Recall']
     x = np.arange(len(metrics))
@@ -110,11 +100,10 @@ def plot_svm_kernels_comparison(kernel_results: Dict, output_dir: Path) -> None:
     output_path = output_dir / 'svm_kernels_comparison.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"✓ График сохранен: {output_path}")
-
+    print(f"График сохранен: {output_path}")
 
 def analyze_svm_kernels(kernel_results: Dict, output_dir: Path = None) -> None:
-    """Анализирует результаты экспериментов с различными kernel функциями SVM."""
+    
     print("\n" + "="*70)
     print("АНАЛИЗ 1: Сравнение различных kernel функций SVM")
     print("="*70)
@@ -132,7 +121,6 @@ def analyze_svm_kernels(kernel_results: Dict, output_dir: Path = None) -> None:
             'training_time': best_result['training_time']
         }
     
-    # Создаем DataFrame для удобного отображения
     df_data = []
     for kernel, summary in kernel_summary.items():
         df_data.append({
@@ -149,26 +137,22 @@ def analyze_svm_kernels(kernel_results: Dict, output_dir: Path = None) -> None:
     print("\nСводная таблица лучших результатов для каждого kernel:")
     print(df.to_string(index=False))
     
-    # Определяем лучший kernel
     best_kernel = max(kernel_summary.items(), key=lambda x: x[1]['f1_score'])
-    print(f"\n✓ Лучший kernel: {best_kernel[0]}")
+    print(f"\nЛучший kernel: {best_kernel[0]}")
     print(f"  F1-score: {best_kernel[1]['f1_score']:.4f}")
     print(f"  Accuracy: {best_kernel[1]['accuracy']:.4f}")
     print(f"  Оптимальное количество итераций: {best_kernel[1]['best_iter']}")
     
-    # Строим графики
     if output_dir:
         plot_svm_kernels_comparison(kernel_results, output_dir)
 
-
 def plot_iterations_analysis(results: List[Dict], model_name: str, output_dir: Path) -> None:
-    """Строит графики зависимости метрик от количества итераций."""
+    
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle(f'Metrics vs Iterations: {model_name}', fontsize=16, fontweight='bold')
     
     iters = [r['max_iter'] for r in results]
     
-    # F1-score
     ax1 = axes[0, 0]
     f1_scores = [r['f1_score'] for r in results]
     ax1.plot(iters, f1_scores, marker='o', color='#2ecc71', linewidth=2, markersize=8)
@@ -177,7 +161,6 @@ def plot_iterations_analysis(results: List[Dict], model_name: str, output_dir: P
     ax1.set_title('F1-score vs Iterations')
     ax1.grid(True, alpha=0.3)
     
-    # Accuracy
     ax2 = axes[0, 1]
     accuracies = [r['accuracy'] for r in results]
     ax2.plot(iters, accuracies, marker='s', color='#3498db', linewidth=2, markersize=8)
@@ -186,7 +169,6 @@ def plot_iterations_analysis(results: List[Dict], model_name: str, output_dir: P
     ax2.set_title('Accuracy vs Iterations')
     ax2.grid(True, alpha=0.3)
     
-    # Training time
     ax3 = axes[1, 0]
     times = [r['training_time'] for r in results]
     ax3.plot(iters, times, marker='^', color='#e74c3c', linewidth=2, markersize=8)
@@ -195,7 +177,6 @@ def plot_iterations_analysis(results: List[Dict], model_name: str, output_dir: P
     ax3.set_title('Training Time vs Iterations')
     ax3.grid(True, alpha=0.3)
     
-    # Все метрики вместе (нормализованные)
     ax4 = axes[1, 1]
     ax4.plot(iters, f1_scores, marker='o', label='F1-score', linewidth=2)
     ax4.plot(iters, accuracies, marker='s', label='Accuracy', linewidth=2)
@@ -213,11 +194,10 @@ def plot_iterations_analysis(results: List[Dict], model_name: str, output_dir: P
     output_path = output_dir / f'iterations_analysis_{safe_name}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"✓ График сохранен: {output_path}")
-
+    print(f"График сохранен: {output_path}")
 
 def analyze_iterations(results: List[Dict], model_name: str, output_dir: Path = None) -> None:
-    """Анализирует влияние количества итераций на качество модели."""
+    
     print(f"\n" + "="*70)
     print(f"АНАЛИЗ 2: Влияние количества итераций ({model_name})")
     print("="*70)
@@ -237,13 +217,11 @@ def analyze_iterations(results: List[Dict], model_name: str, output_dir: Path = 
     print("\nРезультаты по итерациям:")
     print(df.to_string(index=False))
     
-    # Находим оптимальное количество итераций
     best_result = max(results, key=lambda x: x['f1_score'])
-    print(f"\n✓ Оптимальное количество итераций: {best_result['max_iter']}")
+    print(f"\nОптимальное количество итераций: {best_result['max_iter']}")
     print(f"  F1-score: {best_result['f1_score']:.4f}")
     print(f"  Accuracy: {best_result['accuracy']:.4f}")
     
-    # Проверяем, есть ли значительное улучшение при увеличении итераций
     if len(results) > 1:
         improvements = []
         for i in range(1, len(results)):
@@ -254,21 +232,18 @@ def analyze_iterations(results: List[Dict], model_name: str, output_dir: Path = 
         
         print("\nУлучшение при увеличении итераций:")
         for prev_iter, curr_iter, improvement in improvements:
-            if improvement > 0.01:  # Значимое улучшение
-                print(f"  {prev_iter} → {curr_iter}: +{improvement:.4f} F1-score")
-            elif improvement < -0.01:  # Ухудшение
-                print(f"  {prev_iter} → {curr_iter}: {improvement:.4f} F1-score (ухудшение)")
+            if improvement > 0.01:
+                print(f"  {prev_iter} -> {curr_iter}: +{improvement:.4f} F1-score")
+            elif improvement < -0.01:
+                print(f"  {prev_iter} -> {curr_iter}: {improvement:.4f} F1-score (ухудшение)")
             else:
-                print(f"  {prev_iter} → {curr_iter}: {improvement:.4f} F1-score (без значимых изменений)")
+                print(f"  {prev_iter} -> {curr_iter}: {improvement:.4f} F1-score (без значимых изменений)")
     
-    # Строим графики
     if output_dir:
         plot_iterations_analysis(results, model_name, output_dir)
 
-
 def plot_svm_mlp_comparison(svm_results: Dict, mlp_results: List[Dict], output_dir: Path) -> None:
-    """Строит графики сравнения SVM и MLP."""
-    # Находим лучшие результаты
+    
     best_svm = None
     best_svm_score = 0
     for kernel, results in svm_results.items():
@@ -282,7 +257,6 @@ def plot_svm_mlp_comparison(svm_results: Dict, mlp_results: List[Dict], output_d
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
     fig.suptitle('SVM vs MLP Comparison', fontsize=16, fontweight='bold')
     
-    # Сравнение метрик
     ax1 = axes[0]
     metrics = ['F1-score', 'Accuracy', 'Precision', 'Recall']
     svm_values = [
@@ -311,7 +285,6 @@ def plot_svm_mlp_comparison(svm_results: Dict, mlp_results: List[Dict], output_d
     ax1.grid(True, alpha=0.3, axis='y')
     ax1.set_ylim([0, 1])
     
-    # Время обучения
     ax2 = axes[1]
     models = [f'SVM\n({best_svm["kernel"]})', 'MLP']
     times = [best_svm['training_time'], best_mlp['training_time']]
@@ -324,9 +297,7 @@ def plot_svm_mlp_comparison(svm_results: Dict, mlp_results: List[Dict], output_d
         ax2.text(bar.get_x() + bar.get_width()/2., height,
                 f'{height:.2f}s', ha='center', va='bottom')
     
-    # F1-score по итерациям
     ax3 = axes[2]
-    # Собираем данные для SVM (лучший kernel)
     svm_kernel = best_svm['kernel']
     svm_iters_data = [(r['max_iter'], r['f1_score']) for r in svm_results[svm_kernel]]
     svm_iters_data.sort(key=lambda x: x[0])
@@ -352,11 +323,10 @@ def plot_svm_mlp_comparison(svm_results: Dict, mlp_results: List[Dict], output_d
     output_path = output_dir / 'svm_mlp_comparison.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"✓ График сохранен: {output_path}")
-
+    print(f"График сохранен: {output_path}")
 
 def plot_confusion_matrix(conf_matrix: List[List[int]], title: str, output_dir: Path, class_labels: List[str] = None) -> None:
-    """Строит heatmap для confusion matrix."""
+    
     if class_labels is None:
         class_labels = [f'Class {i}' for i in range(len(conf_matrix))]
     
@@ -373,16 +343,14 @@ def plot_confusion_matrix(conf_matrix: List[List[int]], title: str, output_dir: 
     output_path = output_dir / f'confusion_matrix_{safe_title}.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"✓ График сохранен: {output_path}")
-
+    print(f"График сохранен: {output_path}")
 
 def compare_svm_mlp(svm_results: Dict, mlp_results: List[Dict], output_dir: Path = None) -> None:
-    """Сравнивает SVM и MLP."""
+    
     print("\n" + "="*70)
     print("АНАЛИЗ 3: Сравнение SVM и MLP")
     print("="*70)
     
-    # Находим лучший результат SVM
     best_svm = None
     best_svm_score = 0
     for kernel, results in svm_results.items():
@@ -391,7 +359,6 @@ def compare_svm_mlp(svm_results: Dict, mlp_results: List[Dict], output_dir: Path
                 best_svm_score = result['f1_score']
                 best_svm = result
     
-    # Находим лучший результат MLP
     best_mlp = max(mlp_results, key=lambda x: x['f1_score'])
     
     print("\nЛучшие результаты:")
@@ -418,22 +385,20 @@ def compare_svm_mlp(svm_results: Dict, mlp_results: List[Dict], output_dir: Path
     time_diff = best_svm['training_time'] - best_mlp['training_time']
     
     if f1_diff > 0:
-        print(f"  ✓ SVM превосходит MLP на {f1_diff:.4f} по F1-score")
+        print(f"  SVM превосходит MLP на {f1_diff:.4f} по F1-score")
     elif f1_diff < 0:
-        print(f"  ✓ MLP превосходит SVM на {abs(f1_diff):.4f} по F1-score")
+        print(f"  MLP превосходит SVM на {abs(f1_diff):.4f} по F1-score")
     else:
-        print(f"  ≈ Модели показывают схожие результаты по F1-score")
+        print(f"  Модели показывают схожие результаты по F1-score")
     
     if abs(time_diff) > 1:
         if time_diff > 0:
-            print(f"  ⚠ SVM обучается медленнее на {time_diff:.2f}с")
+            print(f"  SVM обучается медленнее на {time_diff:.2f}с")
         else:
-            print(f"  ⚠ MLP обучается медленнее на {abs(time_diff):.2f}с")
+            print(f"  MLP обучается медленнее на {abs(time_diff):.2f}с")
     
-    # Строим графики
     if output_dir:
         plot_svm_mlp_comparison(svm_results, mlp_results, output_dir)
-        # Строим confusion matrix для лучших моделей
         plot_confusion_matrix(best_svm['confusion_matrix'], 
                             f'SVM ({best_svm["kernel"]}) - Best Model', 
                             output_dir)
@@ -441,13 +406,11 @@ def compare_svm_mlp(svm_results: Dict, mlp_results: List[Dict], output_dir: Path
                             'MLP - Best Model', 
                             output_dir)
 
-
 def plot_dimensionality_analysis(dimension_results: Dict, output_dir: Path) -> None:
-    """Строит графики анализа изменения размерности."""
+    
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     fig.suptitle('Dimensionality Analysis', fontsize=16, fontweight='bold')
     
-    # Dropout analysis
     if 'dropout' in dimension_results:
         ax1 = axes[0]
         dropout_data = dimension_results['dropout']
@@ -471,7 +434,6 @@ def plot_dimensionality_analysis(dimension_results: Dict, output_dir: Path) -> N
         labels = [l.get_label() for l in lines]
         ax1.legend(lines, labels, loc='upper right')
     
-    # PCA analysis
     if 'pca' in dimension_results:
         ax2 = axes[1]
         pca_data = dimension_results['pca']
@@ -490,20 +452,18 @@ def plot_dimensionality_analysis(dimension_results: Dict, output_dir: Path) -> N
         ax2_twin.set_ylabel('Accuracy', color='#3498db')
         ax2.set_title('PCA Dimensionality Reduction')
         ax2.grid(True, alpha=0.3)
-        ax2.invert_xaxis()  # Инвертируем ось X, чтобы показывать уменьшение размерности
+        ax2.invert_xaxis()
         
         lines = line1 + line2
         labels = [l.get_label() for l in lines]
         ax2.legend(lines, labels, loc='upper right')
     
-    # Mathematical features comparison
     if 'mathematical_features' in dimension_results:
         ax3 = axes[2]
         result = dimension_results['mathematical_features']
         original_dims = result['original_dimensions']
         new_dims = result['new_dimensions']
         
-        # Сравниваем с базовым результатом (предполагаем, что он в dropout[0])
         baseline_f1 = 0
         baseline_acc = 0
         if 'dropout' in dimension_results and len(dimension_results['dropout']) > 0:
@@ -528,7 +488,6 @@ def plot_dimensionality_analysis(dimension_results: Dict, output_dir: Path) -> N
         ax3.grid(True, alpha=0.3, axis='y')
         ax3.set_ylim([0, 1])
         
-        # Добавляем значения на столбцы
         for bars in [bars1, bars2]:
             for bar in bars:
                 height = bar.get_height()
@@ -539,16 +498,14 @@ def plot_dimensionality_analysis(dimension_results: Dict, output_dir: Path) -> N
     output_path = output_dir / 'dimensionality_analysis.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"✓ График сохранен: {output_path}")
-
+    print(f"График сохранен: {output_path}")
 
 def analyze_dimensionality(dimension_results: Dict, output_dir: Path = None) -> None:
-    """Анализирует влияние изменения размерности на качество классификации."""
+    
     print("\n" + "="*70)
     print("АНАЛИЗ 4: Влияние изменения размерности")
     print("="*70)
     
-    # Анализ dropout
     if 'dropout' in dimension_results:
         print("\n--- Отбрасывание случайных размерностей ---")
         dropout_data = []
@@ -563,7 +520,7 @@ def analyze_dimensionality(dimension_results: Dict, output_dir: Path = None) -> 
         df_dropout = pd.DataFrame(dropout_data)
         print(df_dropout.to_string(index=False))
         
-        baseline = dropout_data[0]  # Первый результат (без отбрасывания)
+        baseline = dropout_data[0]
         baseline_f1 = float(baseline['F1-score']) if isinstance(baseline['F1-score'], str) else baseline['F1-score']
         baseline_acc = float(baseline['Accuracy']) if isinstance(baseline['Accuracy'], str) else baseline['Accuracy']
         print(f"\nБазовый результат (без отбрасывания): F1={baseline_f1:.4f}, Acc={baseline_acc:.4f}")
@@ -575,7 +532,6 @@ def analyze_dimensionality(dimension_results: Dict, output_dir: Path = None) -> 
             acc_change = item_acc - baseline_acc
             print(f"  Отброшено {item['Отброшено']} размерностей ({item['Осталось']} осталось): F1={f1_change:+.4f}, Acc={acc_change:+.4f}")
     
-    # Анализ PCA
     if 'pca' in dimension_results:
         print("\n--- Сокращение размерности через PCA ---")
         pca_data = []
@@ -590,7 +546,7 @@ def analyze_dimensionality(dimension_results: Dict, output_dir: Path = None) -> 
         df_pca = pd.DataFrame(pca_data)
         print(df_pca.to_string(index=False))
         
-        baseline = pca_data[0]  # Первый результат (исходная размерность)
+        baseline = pca_data[0]
         baseline_f1 = float(baseline['F1-score']) if isinstance(baseline['F1-score'], str) else baseline['F1-score']
         baseline_acc = float(baseline['Accuracy']) if isinstance(baseline['Accuracy'], str) else baseline['Accuracy']
         print(f"\nБазовый результат (100 компонент): F1={baseline_f1:.4f}, Acc={baseline_acc:.4f}")
@@ -602,7 +558,6 @@ def analyze_dimensionality(dimension_results: Dict, output_dir: Path = None) -> 
             acc_change = item_acc - baseline_acc
             print(f"  PCA до {item['Компоненты']} компонент ({item['Объясненная дисперсия']}): F1={f1_change:+.4f}, Acc={acc_change:+.4f}")
     
-    # Анализ математических признаков
     if 'mathematical_features' in dimension_results:
         print("\n--- Добавление математических признаков ---")
         result = dimension_results['mathematical_features']
@@ -611,23 +566,19 @@ def analyze_dimensionality(dimension_results: Dict, output_dir: Path = None) -> 
         print(f"Accuracy: {result['accuracy']:.4f}")
         print(f"F1-score: {result['f1_score']:.4f}")
         
-        # Сравнение с базовым результатом (нужно знать, какой был базовый)
         print("\nПримечание: Для сравнения с базовым результатом используйте лучший результат из анализа SVM/MLP")
     
-    # Строим графики
     if output_dir:
         plot_dimensionality_analysis(dimension_results, output_dir)
 
-
 def generate_summary_report(results: Dict) -> None:
-    """Генерирует итоговый отчет с выводами."""
+    
     print("\n" + "="*70)
     print("ИТОГОВЫЕ ВЫВОДЫ")
     print("="*70)
     
     conclusions = []
     
-    # 1. Оптимальное количество итераций
     if 'svm_kernels' in results:
         all_svm_results = []
         for kernel, kernel_results in results['svm_kernels'].items():
@@ -639,7 +590,6 @@ def generate_summary_report(results: Dict) -> None:
         best_mlp = max(results['mlp'], key=lambda x: x['f1_score'])
         conclusions.append(f"2. Оптимальное количество итераций для MLP: {best_mlp['max_iter']}")
     
-    # 2. Лучший kernel
     if 'svm_kernels' in results:
         kernel_scores = {}
         for kernel, kernel_results in results['svm_kernels'].items():
@@ -648,7 +598,6 @@ def generate_summary_report(results: Dict) -> None:
         best_kernel = max(kernel_scores.items(), key=lambda x: x[1])
         conclusions.append(f"3. Лучший kernel для SVM: {best_kernel[0]} (F1-score: {best_kernel[1]:.4f})")
     
-    # 3. Сравнение моделей
     if 'svm_kernels' in results and 'mlp' in results:
         all_svm_results = []
         for kernel, kernel_results in results['svm_kernels'].items():
@@ -661,7 +610,6 @@ def generate_summary_report(results: Dict) -> None:
         else:
             conclusions.append(f"4. Лучшая модель: MLP с F1-score {best_mlp['f1_score']:.4f}")
     
-    # 5. Влияние размерности
     if 'dimension_experiments' in results:
         dim_exp = results['dimension_experiments']
         if 'dropout' in dim_exp and len(dim_exp['dropout']) > 0:
@@ -679,9 +627,8 @@ def generate_summary_report(results: Dict) -> None:
     for conclusion in conclusions:
         print(f"\n{conclusion}")
 
-
 def main():
-    """Главная функция для анализа результатов."""
+    
     import argparse
     
     parser = argparse.ArgumentParser(description='Анализ результатов экспериментов классификации')
@@ -697,18 +644,15 @@ def main():
         print("Сначала выполните эксперименты: python source/main.py")
         return
     
-    # Создаем директорию для графиков
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
     print("Загрузка результатов...")
     results = load_results(results_path)
     
-    # Анализ результатов
     if 'svm_kernels' in results:
         analyze_svm_kernels(results['svm_kernels'], output_dir)
         
-        # Анализ итераций для каждого kernel
         for kernel, kernel_results in results['svm_kernels'].items():
             analyze_iterations(kernel_results, f"SVM ({kernel})", output_dir)
     
@@ -721,7 +665,6 @@ def main():
     if 'dimension_experiments' in results:
         analyze_dimensionality(results['dimension_experiments'], output_dir)
     
-    # Генерируем итоговый отчет
     generate_summary_report(results)
     
     print("\n" + "="*70)
@@ -729,7 +672,5 @@ def main():
     print(f"Все графики сохранены в директории: {output_dir}")
     print("="*70)
 
-
 if __name__ == "__main__":
     main()
-

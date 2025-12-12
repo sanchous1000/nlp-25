@@ -1,6 +1,3 @@
-"""
-Модуль для проведения экспериментов с различными моделями классификации.
-"""
 import time
 import warnings
 import numpy as np
@@ -9,11 +6,9 @@ from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 
-# Подавляем warnings для чистого вывода
 warnings.filterwarnings('ignore')
 
 from metrics import calculate_all_metrics
-
 
 def train_svm(
     X_train: np.ndarray,
@@ -23,24 +18,14 @@ def train_svm(
     C: float = 1.0,
     tol: float = 1e-3
 ) -> Tuple[SVC, float]:
-    """
-    Обучает модель SVM.
     
-    Args:
-        tol: допуск для остановки (tolerance). Если None, используется значение по умолчанию.
-             Увеличение значения позволяет завершить обучение раньше при достижении достаточной точности.
-    
-    Returns:
-        Обученная модель и время обучения в секундах.
-    """
-    # Для больших датасетов увеличиваем max_iter и используем tol для более гибкой сходимости
     model = SVC(
         kernel=kernel, 
         max_iter=max_iter, 
         C=C, 
         tol=tol,
         random_state=42,
-        verbose=False  # Отключаем подробный вывод
+        verbose=False
     )
     
     start_time = time.time()
@@ -49,7 +34,6 @@ def train_svm(
     
     return model, training_time
 
-
 def train_mlp(
     X_train: np.ndarray,
     y_train: np.ndarray,
@@ -57,12 +41,7 @@ def train_mlp(
     hidden_layer_sizes: Tuple[int, ...] = (100,),
     random_state: int = 42
 ) -> Tuple[MLPClassifier, float]:
-    """
-    Обучает модель MLP (Multi-Layer Perceptron).
     
-    Returns:
-        Обученная модель и время обучения в секундах.
-    """
     model = MLPClassifier(
         hidden_layer_sizes=hidden_layer_sizes,
         max_iter=max_iter,
@@ -76,7 +55,6 @@ def train_mlp(
     
     return model, training_time
 
-
 def run_experiment(
     X_train: np.ndarray,
     y_train: np.ndarray,
@@ -88,34 +66,20 @@ def run_experiment(
     num_classes: int = None,
     **kwargs
 ) -> Dict:
-    """
-    Запускает один эксперимент с заданными параметрами.
     
-    Args:
-        model_type: 'svm' или 'mlp'
-        kernel: тип ядра для SVM ('linear', 'rbf', 'poly', 'sigmoid')
-        max_iter: максимальное количество итераций
-        num_classes: количество классов (если None, определяется автоматически)
-        **kwargs: дополнительные параметры для моделей
-    
-    Returns:
-        Словарь с результатами эксперимента
-    """
     if num_classes is None:
         num_classes = len(np.unique(np.concatenate([y_train, y_test])))
     
-    # Нормализация данных (важно для некоторых kernel функций)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    # Обучение модели
     if model_type == 'svm':
         if 'C' in kwargs:
             C = kwargs['C']
         else:
             C = 1.0
-        tol = kwargs.get('tol', 1e-3)  # Используем tol по умолчанию 1e-3 для лучшей сходимости
+        tol = kwargs.get('tol', 1e-3)
         model, training_time = train_svm(X_train_scaled, y_train, kernel=kernel, max_iter=max_iter, C=C, tol=tol)
     elif model_type == 'mlp':
         hidden_layer_sizes = kwargs.get('hidden_layer_sizes', (100,))
@@ -124,13 +88,10 @@ def run_experiment(
     else:
         raise ValueError(f"Unknown model_type: {model_type}")
     
-    # Предсказания
     y_pred = model.predict(X_test_scaled)
     
-    # Расчет метрик
     metrics = calculate_all_metrics(y_test, y_pred, num_classes)
     
-    # Формирование результата
     result = {
         'model_type': model_type,
         'kernel': kernel if model_type == 'svm' else None,
@@ -148,7 +109,6 @@ def run_experiment(
     
     return result
 
-
 def run_iteration_experiments(
     X_train: np.ndarray,
     y_train: np.ndarray,
@@ -159,11 +119,9 @@ def run_iteration_experiments(
     max_iters: List[int] = None,
     num_classes: int = None
 ) -> List[Dict]:
-    """
-    Запускает серию экспериментов с разным количеством итераций.
-    """
+    
     if max_iters is None:
-        max_iters = [500, 1000, 2000]  # Уменьшено для ускорения на CPU
+        max_iters = [500, 1000, 2000]
     
     results = []
     for max_iter in max_iters:
@@ -180,7 +138,6 @@ def run_iteration_experiments(
     
     return results
 
-
 def run_kernel_comparison(
     X_train: np.ndarray,
     y_train: np.ndarray,
@@ -190,11 +147,9 @@ def run_kernel_comparison(
     max_iter: int = 1000,
     num_classes: int = None
 ) -> List[Dict]:
-    """
-    Сравнивает различные kernel функции для SVM.
-    """
+    
     if kernels is None:
-        kernels = ['linear', 'rbf']  # Уменьшено для ускорения (poly и sigmoid медленнее)
+        kernels = ['linear', 'rbf']
     
     results = []
     for kernel in kernels:
@@ -210,4 +165,3 @@ def run_kernel_comparison(
         print(f"    Accuracy: {result['accuracy']:.4f}, F1: {result['f1_score']:.4f}, Time: {result['training_time']:.2f}s")
     
     return results
-

@@ -1,13 +1,9 @@
-"""
-Главный модуль для выполнения лабораторной работы №3.1.
-"""
 import argparse
 import json
 import warnings
 from pathlib import Path
 import numpy as np
 
-# Подавляем warnings для чистого вывода
 warnings.filterwarnings('ignore')
 
 from data_loader import load_train_test_data, load_vectors_from_tsv, load_labels_from_csv
@@ -19,7 +15,6 @@ from dimensionality import (
 )
 from vector_generator import generate_vectors_for_dataset
 
-
 def generate_vectors_if_needed(
     train_csv_path: Path,
     test_csv_path: Path,
@@ -27,7 +22,7 @@ def generate_vectors_if_needed(
     test_vectors_path: Path,
     w2v_model_path: Path
 ):
-    """Генерирует векторы, если они не существуют."""
+    
     if not train_vectors_path.exists():
         print(f"Генерация векторов для обучающей выборки...")
         generate_vectors_for_dataset(train_csv_path, w2v_model_path, train_vectors_path)
@@ -36,9 +31,7 @@ def generate_vectors_if_needed(
         print(f"Генерация векторов для тестовой выборки...")
         generate_vectors_for_dataset(test_csv_path, w2v_model_path, test_vectors_path)
 
-
 def main():
-    # Подавляем все warnings для чистого вывода
     warnings.filterwarnings('ignore')
     import os
     os.environ['PYTHONWARNINGS'] = 'ignore'
@@ -57,7 +50,6 @@ def main():
     
     args = parser.parse_args()
     
-    # Определяем пути
     lab2_path = Path(args.lab2_path).resolve()
     lab3_path = Path(__file__).parent.parent
     
@@ -70,7 +62,6 @@ def main():
     train_vectors = assets_dir / 'train_vectors.tsv'
     test_vectors = lab2_path / 'assets' / 'embeddings' / 'test_vectors.tsv'
     
-    # Генерируем векторы, если нужно
     if args.generate_vectors or not train_vectors.exists():
         if not w2v_model.exists():
             print(f"ОШИБКА: Модель Word2Vec не найдена по пути {w2v_model}")
@@ -78,7 +69,6 @@ def main():
             return
         generate_vectors_if_needed(train_csv, test_csv, train_vectors, test_vectors, w2v_model)
     
-    # Загружаем данные
     print("\n" + "="*60)
     print("Загрузка данных...")
     print("="*60)
@@ -86,14 +76,12 @@ def main():
         train_csv, test_csv, train_vectors, test_vectors
     )
     
-    # Опционально используем подвыборку для ускорения
     if args.sample_size is not None:
-        print(f"\n⚠ Используется подвыборка размером {args.sample_size} образцов для ускорения")
+        print(f"\nИспользуется подвыборка размером {args.sample_size} образцов для ускорения")
         if args.sample_size < len(X_train):
             indices = np.random.RandomState(42).choice(len(X_train), size=args.sample_size, replace=False)
             X_train = X_train[indices]
             y_train = y_train[indices]
-        # Для тестовой выборки используем меньшую подвыборку (например, 10% от train)
         test_sample_size = min(args.sample_size // 10, len(X_test))
         if test_sample_size < len(X_test) and test_sample_size > 0:
             test_indices = np.random.RandomState(42).choice(len(X_test), size=test_sample_size, replace=False)
@@ -109,18 +97,15 @@ def main():
     all_results = {}
     
     if not args.skip_basic:
-        # Эксперимент 1: SVM с разными kernel функциями и количеством итераций
         print("\n" + "="*60)
         print("Эксперимент 1: SVM с различными kernel функциями")
         print("="*60)
         
-        # Используем только линейный и RBF kernel для ускорения (poly и sigmoid медленнее)
         kernels = ['linear', 'rbf']
         kernel_results = {}
         
         for kernel in kernels:
             print(f"\n--- Kernel: {kernel} ---")
-            # Уменьшаем количество экспериментов для ускорения
             max_iters = [500, 1000, 2000]
             results = run_iteration_experiments(
                 X_train, y_train, X_test, y_test,
@@ -133,7 +118,6 @@ def main():
         
         all_results['svm_kernels'] = kernel_results
         
-        # Эксперимент 2: Сравнение с MLP
         print("\n" + "="*60)
         print("Эксперимент 2: Сравнение SVM и MLP")
         print("="*60)
@@ -142,12 +126,11 @@ def main():
             X_train, y_train, X_test, y_test,
             model_type='mlp',
             kernel=None,
-            max_iters=[500, 1000, 2000],  # Уменьшено для ускорения
+            max_iters=[500, 1000, 2000],
             num_classes=num_classes
         )
         all_results['mlp'] = mlp_results
         
-        # Находим оптимальные параметры
         print("\n" + "="*60)
         print("Анализ результатов")
         print("="*60)
@@ -183,17 +166,16 @@ def main():
         print(f"  F1-score: {best_mlp_result['f1_score']:.4f}")
         print(f"  Training time: {best_mlp_result['training_time']:.2f}s")
         
-        # Выбираем лучшую модель для дальнейших экспериментов
         if best_svm_score >= best_mlp_score:
             best_model_type = 'svm'
             best_kernel = best_svm_result['kernel']
             best_max_iter = best_svm_result['max_iter']
-            print(f"\n✓ Выбрана модель: SVM ({best_kernel}) с {best_max_iter} итерациями")
+            print(f"\nВыбрана модель: SVM ({best_kernel}) с {best_max_iter} итерациями")
         else:
             best_model_type = 'mlp'
             best_kernel = None
             best_max_iter = best_mlp_result['max_iter']
-            print(f"\n✓ Выбрана модель: MLP с {best_max_iter} итерациями")
+            print(f"\nВыбрана модель: MLP с {best_max_iter} итерациями")
         
         all_results['best_model'] = {
             'type': best_model_type,
@@ -202,13 +184,11 @@ def main():
         }
     
     if not args.skip_dimension:
-        # Эксперимент 3: Изменение размерности
         print("\n" + "="*60)
         print("Эксперимент 3: Изменение размерности векторных представлений")
         print("="*60)
         
         if args.skip_basic:
-            # Используем значения по умолчанию
             best_model_type = 'svm'
             best_kernel = 'linear'
             best_max_iter = 1000
@@ -219,9 +199,7 @@ def main():
         
         dimension_results = {}
         
-        # 3.1: Отбрасывание случайных размерностей
         print("\n--- 3.1: Отбрасывание случайных размерностей ---")
-        # Уменьшаем количество экспериментов для ускорения
         num_drops = [0, 20, 40]
         dropout_experiments = experiment_dimension_dropout(X_train, X_test, num_drops)
         
@@ -242,9 +220,7 @@ def main():
         
         dimension_results['dropout'] = dropout_results
         
-        # 3.2: Сокращение размерности через PCA
         print("\n--- 3.2: Сокращение размерности через PCA ---")
-        # Уменьшаем количество экспериментов для ускорения
         n_components_list = [100, 50, 20]
         pca_experiments = experiment_pca_reduction(X_train, X_test, n_components_list)
         
@@ -266,7 +242,6 @@ def main():
         
         dimension_results['pca'] = pca_results
         
-        # 3.3: Добавление математических признаков
         print("\n--- 3.3: Добавление математических признаков ---")
         X_train_enhanced, X_test_enhanced = experiment_mathematical_features(X_train, X_test)
         print(f"  Исходная размерность: {X_train.shape[1]}")
@@ -286,9 +261,7 @@ def main():
         
         all_results['dimension_experiments'] = dimension_results
     
-    # Сохранение результатов
     results_path = assets_dir / 'results.json'
-    # Преобразуем numpy типы в Python типы для JSON
     def convert_numpy(obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -306,12 +279,10 @@ def main():
     with open(results_path, 'w', encoding='utf-8') as f:
         json.dump(all_results_converted, f, indent=2, ensure_ascii=False)
     
-    print(f"\n✓ Результаты сохранены в {results_path}")
+    print(f"\nРезультаты сохранены в {results_path}")
     print("\n" + "="*60)
     print("Эксперименты завершены!")
     print("="*60)
 
-
 if __name__ == "__main__":
     main()
-

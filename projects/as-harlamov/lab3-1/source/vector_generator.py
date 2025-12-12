@@ -1,6 +1,3 @@
-"""
-Модуль для генерации векторных представлений документов используя модель из lab2.
-"""
 import sys
 import warnings
 from pathlib import Path
@@ -8,21 +5,17 @@ import numpy as np
 import pandas as pd
 from gensim.models import Word2Vec
 
-# Подавляем warnings для чистого вывода
 warnings.filterwarnings('ignore')
 
-
 def _import_lab2_modules(lab2_source_path: Path):
-    """Динамически импортирует необходимые модули из lab2."""
+    
     import importlib.util
     
-    # Импортируем utils сначала, так как vectorizer зависит от него
     utils_spec = importlib.util.spec_from_file_location("utils", lab2_source_path / "utils.py")
     utils_module = importlib.util.module_from_spec(utils_spec)
     sys.modules["utils"] = utils_module
     utils_spec.loader.exec_module(utils_module)
     
-    # Импортируем vectorizer
     vectorizer_spec = importlib.util.spec_from_file_location("vectorizer", lab2_source_path / "vectorizer.py")
     vectorizer_module = importlib.util.module_from_spec(vectorizer_spec)
     sys.modules["vectorizer"] = vectorizer_module
@@ -30,13 +23,11 @@ def _import_lab2_modules(lab2_source_path: Path):
     
     return vectorizer_module.document_to_vector
 
-
 def document_to_vector(text: str, w2v_model, vector_size: int):
-    """Обертка для document_to_vector из lab2."""
+    
     lab2_path = Path(__file__).parent.parent.parent / 'lab2' / 'source'
     doc_to_vec = _import_lab2_modules(lab2_path)
     return doc_to_vec(text, w2v_model, vector_size)
-
 
 def generate_vectors_for_dataset(
     csv_path: Path,
@@ -44,14 +35,7 @@ def generate_vectors_for_dataset(
     output_path: Path,
     vector_size: int = 100
 ):
-    """
-    Генерирует векторные представления для датасета и сохраняет их в TSV формат.
     
-    Args:
-        csv_path: Путь к CSV файлу с датасетом (class,title,text)
-        w2v_model_path: Путь к обученной Word2Vec модели
-        output_path: Путь для сохранения TSV файла с векторами
-    """
     print(f"Загрузка Word2Vec модели из {w2v_model_path}...")
     w2v_model = Word2Vec.load(str(w2v_model_path))
     
@@ -73,4 +57,3 @@ def generate_vectors_for_dataset(
         f.write("\n".join(output_lines))
     
     print(f"Векторы сохранены в {output_path}")
-
