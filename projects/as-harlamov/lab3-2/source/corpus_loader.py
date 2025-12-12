@@ -5,11 +5,17 @@ import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 
+
 try:
     nltk.download('stopwords', quiet=True)
     STOP_WORDS = set(stopwords.words('english'))
 except:
-    STOP_WORDS = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them'}
+    STOP_WORDS = {
+        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is',
+        'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
+        'could', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we',
+        'they', 'me', 'him', 'her', 'us', 'them',
+    }
 
 
 def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
@@ -19,16 +25,16 @@ def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
     skipped_tokens = 0
     total_lines = 0
     lines_with_lemma = 0
-    
+
     if not annotated_dir.exists():
         raise ValueError(f"Директория не существует: {annotated_dir}")
-    
+
     tsv_files = list(annotated_dir.rglob("*.tsv"))
     if not tsv_files:
         raise ValueError(f"Не найдено TSV файлов в директории: {annotated_dir}")
-    
+
     print(f"  Найдено TSV файлов: {len(tsv_files)}")
-    
+
     for tsv_file in sorted(tsv_files):
         total_files += 1
         document = []
@@ -44,8 +50,8 @@ def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
                     lines_with_lemma += 1
                     if lemma and len(lemma) > 0:
                         lemma_clean = lemma.lower().strip()
-                        if (lemma_clean and len(lemma_clean) > 0 and 
-                            lemma_clean not in STOP_WORDS and 
+                        if (lemma_clean and len(lemma_clean) > 0 and
+                            lemma_clean not in STOP_WORDS and
                             len(lemma_clean) > 1):
                             document.append(lemma_clean)
                         else:
@@ -54,10 +60,10 @@ def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
             documents.append(document)
         else:
             empty_files += 1
-        
+
         if total_files <= 5 and documents:
             print(f"    Файл {tsv_file.name}: {len(document)} токенов")
-    
+
     print(f"  Обработано файлов: {total_files}")
     print(f"  Всего строк: {total_lines}, строк с леммами: {lines_with_lemma}")
     print(f"  Пустых файлов: {empty_files}, файлов с содержимым: {len(documents)}")
@@ -69,7 +75,7 @@ def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
     else:
         print("  ВНИМАНИЕ: Все документы пусты после загрузки!")
         print(f"  Проверьте формат TSV файлов. Ожидается: слово\\tстемма\\тлемма")
-    
+
     return documents
 
 
@@ -78,4 +84,3 @@ def load_corpus_from_csv(csv_path: Path) -> Tuple[List[str], List[int]]:
     texts = df['text'].tolist()
     classes = df['class'].astype(int).tolist()
     return texts, classes
-

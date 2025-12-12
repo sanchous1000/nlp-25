@@ -1,10 +1,9 @@
-import re
 import ssl
 from typing import List
 
 import nltk
 from nltk import pos_tag
-from nltk.corpus import wordnet, stopwords
+from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 
 
@@ -45,16 +44,16 @@ def get_wordnet_pos(treebank_tag: str) -> str:
 
 def tokenize_and_lemmatize(text: str) -> List[str]:
     _setup_nltk()
-    
+
     sentences = nltk.sent_tokenize(text)
     tokens = []
     for sent in sentences:
         words = nltk.word_tokenize(sent)
         tokens.extend(words)
-    
+
     lemmatizer = WordNetLemmatizer()
     stop_words = set(stopwords.words('english'))
-    
+
     lemmatized = []
     pos_tags = pos_tag(tokens, lang='eng')
     for word, pos in pos_tags:
@@ -62,6 +61,5 @@ def tokenize_and_lemmatize(text: str) -> List[str]:
             wn_pos = get_wordnet_pos(pos)
             lemma = lemmatizer.lemmatize(word.lower(), wn_pos)
             lemmatized.append(lemma)
-    
-    return lemmatized
 
+    return lemmatized
