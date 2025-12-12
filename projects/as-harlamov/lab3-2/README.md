@@ -170,7 +170,7 @@ python analyze_results.py
 
 ![Perplexity vs Iterations](assets/perplexity_vs_iterations.png)
 
-#### Визуализация тем (оптимальная конфигурация: max_iter=20, n_topics=2)
+#### Визуализация тем (оптимальная конфигурация: max_iter=10, n_topics=2)
 
-![Topics Visualization 2](assets/topics_visualization_2topics_iter20.png)
+![Topics Visualization 2](assets/topics_visualization_2topics_iter10.png)
 

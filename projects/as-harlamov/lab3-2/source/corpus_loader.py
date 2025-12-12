@@ -17,6 +17,10 @@ except:
         'they', 'me', 'him', 'her', 'us', 'them',
     }
 
+HTML_ARTIFACTS = {'quot', 'lt', 'gt', 'amp', 'nbsp', 'mdash', 'ndash', 'hellip', 'rsquo', 'lsquo', 'rdquo', 'ldquo'}
+
+STOP_WORDS.update(HTML_ARTIFACTS)
+
 
 def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
     documents = []
@@ -52,7 +56,8 @@ def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
                         lemma_clean = lemma.lower().strip()
                         if (lemma_clean and len(lemma_clean) > 0 and
                             lemma_clean not in STOP_WORDS and
-                            len(lemma_clean) > 1):
+                            len(lemma_clean) > 1 and
+                            not lemma_clean.isdigit()):
                             document.append(lemma_clean)
                         else:
                             skipped_tokens += 1
@@ -68,7 +73,7 @@ def load_corpus_from_annotated_dir(annotated_dir: Path) -> List[List[str]]:
     print(f"  Всего строк: {total_lines}, строк с леммами: {lines_with_lemma}")
     print(f"  Пустых файлов: {empty_files}, файлов с содержимым: {len(documents)}")
     if skipped_tokens > 0:
-        print(f"  Пропущено токенов (стоп-слова, однобуквенные): {skipped_tokens}")
+        print(f"  Пропущено токенов (стоп-слова, HTML-артефакты, числа, однобуквенные): {skipped_tokens}")
     if documents:
         print(f"  Пример первого документа (первые 20 токенов): {documents[0][:20]}")
         print(f"  Средняя длина документа: {sum(len(d) for d in documents) / len(documents):.1f} токенов")
