@@ -25,7 +25,7 @@ Accuracy                         0.28
 ### 2.2 Кросс-валидация классификатора
 Для кросс-валидации используется удаление случайных N признаков из выборки. На графике представлены средние значения precision, recall, f1-score и accuracy для всех классов при разных N.
 
-<img src=../assets/metrics.png width=450pt>
+<img src=./assets/metrics.png width=450pt>
 
 
 ### 2.3 Тематическое моделирование
@@ -45,4 +45,5 @@ Accuracy                         0.28
 
 Была построена аппрокcимация полиномом 4-ой степени, наименьшее значение перплексии было достигнуто при 2 темах.
 
-<img src=../assets/perp_graph.png width=450pt>
+
+<img src=./assets/perp_graph.png width=450pt>
