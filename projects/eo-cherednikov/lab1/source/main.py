@@ -84,39 +84,31 @@ def process_text(text):
 
 
 def save_annotations(annotations, output_path):
-    """Сохранение аннотаций в TSV формат"""
     with open(output_path, 'w', encoding='utf-8') as f:
         for i, sent in enumerate(annotations):
             for token, stem, lemma in sent:
                 f.write(f"{token}\t{stem}\t{lemma}\n")
             if i < len(annotations) - 1:
-                f.write("\n")  # Двойной перенос строки между предложениями (один уже есть после последнего токена)
+                f.write("\n")
 
 
 def check_lemmatization(text_sample):
-    """
-    Проверка результатов лемматизации и поиск случаев омонимии.
-    Возвращает словарь с примерами омонимии.
-    """
     tokens = tokenize(text_sample)
     homonymy_examples = {}
     
     for token in tokens:
-        # Пропускаем не-слова
         if not re.match(r'^[A-Za-zА-Яа-яЁё]+$', token):
             continue
             
         word_lower = token.lower()
-        
-        # Получаем все возможные леммы для разных частей речи
+
         lemmas_dict = {
             'n': lemmatizer.lemmatize(word_lower, pos=wordnet.NOUN),
             'v': lemmatizer.lemmatize(word_lower, pos=wordnet.VERB),
             'a': lemmatizer.lemmatize(word_lower, pos=wordnet.ADJ),
             'r': lemmatizer.lemmatize(word_lower, pos=wordnet.ADV)
         }
-        
-        # Находим уникальные леммы (омонимия)
+
         unique_lemmas = set(lemmas_dict.values())
         if len(unique_lemmas) > 1:
             if word_lower not in homonymy_examples:
@@ -130,10 +122,8 @@ def check_lemmatization(text_sample):
 
 
 def analyze_lemmatization():
-    """Анализ результатов лемматизации и поиск случаев омонимии"""
     print("Проверка результатов лемматизации...")
-    
-    # Берем несколько примеров из датасета
+
     train_df = pd.read_csv("assets/raw/train.csv")
     sample_texts = train_df["text"].head(10).tolist()
     
@@ -145,8 +135,7 @@ def analyze_lemmatization():
     print(f"\nНайдено случаев омонимии: {len(all_homonymy)}")
     print("\nПримеры омонимии (словоформа -> возможные леммы):")
     print("-" * 60)
-    
-    # Показываем первые 10 примеров
+
     for i, (word, info) in enumerate(list(all_homonymy.items())[:10]):
         print(f"\n{i+1}. Слово: '{info['word']}'")
         print(f"   Возможные леммы: {', '.join(sorted(info['lemmas']))}")
@@ -159,7 +148,6 @@ def analyze_lemmatization():
 
 
 def write_split(df, split):
-    """Обработка датасета и сохранение аннотаций в структуру директорий"""
     base = f"assets/annotated-corpus/{split}"
     
     print(f"Обработка {split} датасета ({len(df)} документов)...")
@@ -167,26 +155,16 @@ def write_split(df, split):
     for idx, row in tqdm(df.iterrows(), total=len(df), desc=f"Processing {split}"):
         label = str(row["label"])
         text = str(row["text"])
-
-        # Используем индекс как doc_id, если нет колонки id
         doc_id = str(row["id"]) if "id" in row else str(idx)
-
-        # Создаем директорию для класса
         dir_path = os.path.join(base, label)
         os.makedirs(dir_path, exist_ok=True)
-
-        # Путь к выходному файлу
         out_path = os.path.join(dir_path, f"{doc_id}.tsv")
 
-        # Обрабатываем документ
         annotations = process_text(text)
-        
-        # Сохраняем аннотации
         save_annotations(annotations, out_path)
 
 
 if __name__ == "__main__":
-    # Проверка лемматизации перед обработкой
     homonymy_examples = analyze_lemmatization()
 
     # Обработка датасетов
