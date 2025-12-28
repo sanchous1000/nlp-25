@@ -5,20 +5,42 @@ Loads term-document matrix and vocabulary from Lab 2.
 """
 
 import os
+import json
 import pickle
+import re
 import numpy as np
-from scipy.sparse import csr_matrix, load_npz
+from scipy.sparse import csr_matrix
 from typing import Tuple, List, Dict, Optional
+
+try:
+    import nltk
+    from nltk.corpus import stopwords
+    # Download stopwords if not already downloaded
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords', quiet=True)
+    NLTK_AVAILABLE = True
+except ImportError:
+    NLTK_AVAILABLE = False
 
 
 def get_stop_words() -> List[str]:
     """
     Get a refined list of stop words to filter from vocabulary.
+    Uses NLTK's English stopwords plus additional domain-specific words.
     
     Returns:
         List of stop words to remove
     """
-    return [
+    stop_words = []
+    
+    # Add NLTK English stopwords if available
+    if NLTK_AVAILABLE:
+        stop_words.extend(stopwords.words('english'))
+    
+    # Add additional domain-specific stop words
+    additional_stopwords = [
         # Articles and pronouns
         'the', 'a', 'an', 'this', 'that', 'these', 'those',
         'i', 'you', 'he', 'she', 'it', 'we', 'they',
@@ -160,6 +182,11 @@ def get_stop_words() -> List[str]:
         # HTML/XML artifacts
         'lt', 'gt', 'amp', 'nbsp',
     ]
+    
+    # Combine and remove duplicates
+    stop_words = list(set(stop_words + additional_stopwords))
+    
+    return stop_words
 
 
 def filter_stop_words(
@@ -184,11 +211,28 @@ def filter_stop_words(
     # Convert to set for faster lookup
     stop_words_set = set(word.lower() for word in stop_words)
     
-    # Find indices to keep (words not in stop words)
-    keep_indices = [
-        i for i, word in enumerate(vocabulary)
-        if word.lower() not in stop_words_set
-    ]
+    # Find indices to keep (words not in stop words, not digits, not single chars)
+    keep_indices = []
+    for i, word in enumerate(vocabulary):
+        word_lower = word.lower()
+        
+        # Skip if in stop words
+        if word_lower in stop_words_set:
+            continue
+        
+        # Skip if contains only digits (e.g., '39', '2020', '123')
+        if word.isdigit() or (word.replace('.', '').replace('-', '').isdigit()):
+            continue
+        
+        # Skip single character tokens (except 'a' and 'i' which are already in stopwords)
+        if len(word) == 1:
+            continue
+        
+        # Skip if token is mostly punctuation or special characters (no letters)
+        if not re.search(r'[a-zA-Z]', word):
+            continue
+        
+        keep_indices.append(i)
     
     if len(keep_indices) == len(vocabulary):
         # No filtering needed
@@ -200,8 +244,9 @@ def filter_stop_words(
     # Filter matrix (keep only rows corresponding to kept vocabulary)
     filtered_matrix = term_doc_matrix[keep_indices, :]
     
-    print(f"Filtering stop words: {len(vocabulary)} -> {len(filtered_vocabulary)} tokens")
-    print(f"Removed {len(vocabulary) - len(filtered_vocabulary)} stop words")
+    removed_count = len(vocabulary) - len(filtered_vocabulary)
+    print(f"Filtering stop words, digits, and single chars: {len(vocabulary)} -> {len(filtered_vocabulary)} tokens")
+    print(f"Removed {removed_count} tokens (stop words, digits, single chars)")
     
     return filtered_matrix, filtered_vocabulary
 
@@ -222,8 +267,8 @@ def load_vocabulary_from_lab2(
         Matrix format: (vocab_size, num_documents)
     """
     # Paths to Lab 2 output files
-    dict_file = os.path.join(lab2_dir, 'assets', 'token_dictionary.pkl')
-    matrix_file = os.path.join(lab2_dir, 'assets', 'term_document_matrix.npz')
+    dict_file = os.path.join(lab2_dir, 'assets\dictionaries', 'token_dictionary.json')
+    matrix_file = os.path.join(lab2_dir, 'assets\matrices', 'term_document_matrix.pkl')
     
     if not os.path.exists(dict_file):
         raise FileNotFoundError(
@@ -237,14 +282,15 @@ def load_vocabulary_from_lab2(
             "Please run Lab 2 Task 1 first."
         )
     
-    # Load dictionary
+    # Load dictionary (JSON format)
     print(f"Loading dictionary from {dict_file}...")
-    with open(dict_file, 'rb') as f:
-        dict_data = pickle.load(f)
+    with open(dict_file, 'r', encoding='utf-8') as f:
+        dict_data = json.load(f)
     
-    # Load matrix
+    # Load matrix (pickle format)
     print(f"Loading matrix from {matrix_file}...")
-    term_doc_matrix = load_npz(matrix_file)
+    with open(matrix_file, 'rb') as f:
+        term_doc_matrix = pickle.load(f)
     
     # Matrix from lab2 is (vocab_size, num_documents)
     vocab_size, num_docs = term_doc_matrix.shape
@@ -252,39 +298,29 @@ def load_vocabulary_from_lab2(
     print(f"Matrix shape: {term_doc_matrix.shape} (vocab_size={vocab_size}, num_docs={num_docs})")
     
     # Build vocabulary list from dictionary
-    # The dictionary keys are the vocabulary words
-    vocab_from_dict = list(dict_data.get('vocabulary', {}).keys())
-    dict_vocab_size = dict_data.get('vocab_size', len(vocab_from_dict))
+    # Lab 2 dictionary structure: index_to_token maps index -> token
+    index_to_token = dict_data.get('index_to_token', {})
+    dict_vocab_size = dict_data.get('vocab_size', len(index_to_token))
     
     print(f"Dictionary vocab_size: {dict_vocab_size}")
     
-    # Ensure vocabulary list matches matrix vocab_size
-    if len(vocab_from_dict) != vocab_size:
-        # If mismatch, build vocabulary from sorted dictionary
-        if 'vocabulary' in dict_data:
-            vocab_dict = dict_data['vocabulary']
-            # Sort by index if available, otherwise by frequency
-            if isinstance(vocab_dict, dict):
-                # Assume vocabulary is a dict mapping word -> index or word -> frequency
-                # We need to sort by index if available
-                sorted_items = sorted(
-                    vocab_dict.items(),
-                    key=lambda x: x[1] if isinstance(x[1], (int, float)) else 0
-                )
-                vocab_from_dict = [word for word, _ in sorted_items[:vocab_size]]
-            else:
-                vocab_from_dict = list(vocab_dict)[:vocab_size]
+    # Build vocabulary list by iterating through indices
+    # Convert string keys to integers (JSON keys are strings)
+    vocabulary = []
+    for i in range(vocab_size):
+        # Try both string and int keys (JSON may have string keys)
+        token = index_to_token.get(str(i)) or index_to_token.get(i)
+        if token:
+            vocabulary.append(token)
         else:
-            # Fallback: create placeholder vocabulary
-            vocab_from_dict = [f"word_{i}" for i in range(vocab_size)]
+            # Fallback if index is missing
+            vocabulary.append(f"word_{i}")
     
     # Ensure vocabulary list has correct size
-    if len(vocab_from_dict) < vocab_size:
-        vocab_from_dict.extend([f"word_{i}" for i in range(len(vocab_from_dict), vocab_size)])
-    elif len(vocab_from_dict) > vocab_size:
-        vocab_from_dict = vocab_from_dict[:vocab_size]
-    
-    vocabulary = vocab_from_dict
+    if len(vocabulary) < vocab_size:
+        vocabulary.extend([f"word_{i}" for i in range(len(vocabulary), vocab_size)])
+    elif len(vocabulary) > vocab_size:
+        vocabulary = vocabulary[:vocab_size]
     
     # Apply stop word filtering if requested
     if filter_stopwords:
