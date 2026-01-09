@@ -1,7 +1,7 @@
 from time import time
 
 import pandas as pd
-from source.text_processing import TextProcessor
+from .text_processing import TextProcessor
 from tqdm import tqdm
 
 
