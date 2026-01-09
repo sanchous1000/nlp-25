@@ -62,11 +62,11 @@
 
 - Зависимость perplexity от количества тем
 
-![perplexity](/assets/1.png)
+![perplexity](source/assets/1.png)
 
 - График полиномиальной аппроксимации
 
-![poly](/assets/2.png)
+![poly](source/assets/2.png)
 
 ## Заключение
 
