@@ -1,7 +1,7 @@
 import pickle
 
 from gensim.models import Word2Vec
-from source.utils import read_and_group, weighted_average_vector
+from .utils import read_and_group, weighted_average_vector
 from tqdm import tqdm
 
 
