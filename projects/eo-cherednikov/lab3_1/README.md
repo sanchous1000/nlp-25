@@ -46,14 +46,14 @@
 - Время обучения различных моделей
 - Зависимость метрик от количества эпох
 
-![metrics](assets/1.png)
+![metrics](source/assets/1.png)
 
 - Влияние размерности PCA на качество классификации
 
-![PCA](assets/2.png)
+![PCA](source/assets/2.png)
 
 - Зависимость метрик от количества отброшенных размерностей
 
-![out_features](assets/3.png)
+![out_features](source/assets/3.png)
 
 ## Заключение
