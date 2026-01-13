@@ -1,0 +1,10 @@
+nltk
+gensim
+scikit-learn
+scipy
+pandas
+numpy
+matplotlib
+seaborn
+tqdm
+joblib
